@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"math"
-	"sync/atomic"
 )
 
 var (
@@ -36,10 +35,8 @@ func rgb(r, g, b uint8) []byte {
 	return colors[i]
 }
 
-func NextColor(in string) string {
-	idx := int(atomic.AddInt64(&nextColor, 1))
-	raw := color([]byte(in), idx%len(colors))
-	return string(raw)
+func Color(in string, r, b, g uint8) string {
+	return string(colorRGB([]byte(in), r, g, b))
 }
 
 func colorRGB(in []byte, r, g, b uint8) []byte {
@@ -50,31 +47,26 @@ func colorbyteRGB(in byte, r, g, b uint8) []byte {
 	return append(append(rgb(r, g, b), in), reset...)
 }
 
-func color(in []byte, cidx int) []byte {
-	return append(append(colors[cidx], in...), reset...)
-}
-
-func colorbyte(in byte, cidx int) []byte {
-	return append(append(colors[cidx], in), reset...)
-}
-
 type Rainbow struct {
-	wrap io.Writer
-	cidx int
+	wrap    io.Writer
+	h, s, l float64
 }
 
-func New(w io.Writer) *Rainbow {
-	return &Rainbow{wrap: w}
+func New(w io.Writer, r, g, b uint8) *Rainbow {
+	h, s, l := rgbToHSL(r, g, b)
+	return &Rainbow{wrap: w, h: h, s: s, l: l}
 }
 
 func (r *Rainbow) Write(p []byte) (int, error) {
 
 	buf := bytes.NewBuffer(nil)
 	for i := range p {
-		r.cidx = (r.cidx + 1) % len(colors)
-		_, _ = buf.Write(colorbyteRGB(p[i], uint8(r.cidx%255), 0, 0))
-		// r.cidx = (r.cidx + 1) % len(colors)
-		// _, _ = buf.Write(colorbyte(p[i], r.cidx))
+		r.h += (0.5 / 360)
+		if r.h > 1.0 {
+			r.h = 0
+		}
+		r, g, b := hslToRGB(r.h, r.s, r.l)
+		_, _ = buf.Write(colorbyteRGB(p[i], r, g, b))
 	}
 
 	_, err := buf.WriteTo(r.wrap)
@@ -83,7 +75,7 @@ func (r *Rainbow) Write(p []byte) (int, error) {
 
 // stolen from gorilla colors
 
-func RGBToHSL(r, g, b uint8) (h, s, l float64) {
+func rgbToHSL(r, g, b uint8) (h, s, l float64) {
 	fR := float64(r) / 255
 	fG := float64(g) / 255
 	fB := float64(b) / 255
@@ -117,7 +109,7 @@ func RGBToHSL(r, g, b uint8) (h, s, l float64) {
 	return
 }
 
-func HSLToRGB(h, s, l float64) (r, g, b uint8) {
+func hslToRGB(h, s, l float64) (r, g, b uint8) {
 	var fR, fG, fB float64
 	if s == 0 {
 		fR, fG, fB = l, l, l
@@ -139,7 +131,7 @@ func HSLToRGB(h, s, l float64) (r, g, b uint8) {
 	return
 }
 
-// hueToRGB is a helper function for HSLToRGB.
+// hueToRGB is a helper function for hslToRGB.
 func hueToRGB(p, q, t float64) float64 {
 	if t < 0 {
 		t++
