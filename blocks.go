@@ -1,4 +1,7 @@
-package rainbowww
+// Package blocks returns unicode blocks matching 2x2 boolean matrices.
+// This is useful to draw blocks on a terminal output, as it produces
+// twice the resolution of using simple █ blocks.
+package blocks
 
 // Hex | D C B A | Block
 // ----|---------|------
@@ -69,6 +72,9 @@ func Block(a, b, c, d bool) rune {
 	return blocks[i]
 }
 
+// Blocks transforms an m by n matrix of booleans to a m/2 by n/2 matrix
+// of runes, where true entries are represented by a filled block, false
+// entries by nothing.
 func Blocks(in [][]bool) [][]rune {
 	var (
 		h = len(in)

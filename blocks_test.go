@@ -1,47 +1,47 @@
-package rainbowww_test
+package blocks_test
 
 import (
 	"fmt"
-	"github.com/aybabtme/rainbowww"
+	"github.com/aybabtme/blocks"
 )
 
 func ExampleBlock() {
-	top := rainbowww.Block(
+	top := blocks.Block(
 		true, true,
 		false, false,
 	)
-	bottom := rainbowww.Block(
+	bottom := blocks.Block(
 		false, false,
 		true, true,
 	)
 	fmt.Printf("the top %c and the bottom %c.\n", top, bottom)
 
-	left := rainbowww.Block(
+	left := blocks.Block(
 		true, false,
 		true, false,
 	)
 
-	right := rainbowww.Block(
+	right := blocks.Block(
 		false, true,
 		false, true,
 	)
 	fmt.Printf("the left %c and the right %c.\n", left, right)
 
-	topleft := rainbowww.Block(
+	topleft := blocks.Block(
 		true, false,
 		false, false,
 	)
-	topright := rainbowww.Block(
+	topright := blocks.Block(
 		false, true,
 		false, false,
 	)
 	fmt.Printf("the topleft %c and the topright %c.\n", topleft, topright)
 
-	botleft := rainbowww.Block(
+	botleft := blocks.Block(
 		false, false,
 		true, false,
 	)
-	botright := rainbowww.Block(
+	botright := blocks.Block(
 		false, false,
 		false, true,
 	)
@@ -72,7 +72,7 @@ func ExampleBlocks() {
 		{true, true, true, true, true, true, true, true, true, true, true, true, true},
 	}
 	fmt.Println("Happy now?")
-	for _, str := range rainbowww.Blocks(bitmap) {
+	for _, str := range blocks.Blocks(bitmap) {
 		fmt.Printf("%s\n", string(str))
 	}
 	// Output:
